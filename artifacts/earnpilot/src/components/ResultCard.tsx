@@ -117,7 +117,7 @@ export default function ResultCard({ plan, onReset }: { plan: IncomePlan; onRese
               <div key={i} className="bg-[#111] border border-border rounded-xl p-6 hover:border-primary/50 transition-colors">
                 <div className="flex items-center gap-2 mb-3 text-primary">
                   <TrendingUp className="w-5 h-5" />
-                  <span className="font-bold tracking-tight">${opp.potential}</span>
+                  <span className="font-bold tracking-tight">{opp.potential}</span>
                 </div>
                 <h4 className="font-bold text-white text-lg mb-2">{opp.title}</h4>
                 <p className="text-muted-foreground text-sm leading-relaxed">{opp.action}</p>

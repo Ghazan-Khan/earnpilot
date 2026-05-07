@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Hero({ onStart }: { onStart: () => void }) {
   return (
-    <div className="flex flex-col items-center text-center space-y-6 py-12">
+    <div className="flex flex-col items-center justify-center text-center space-y-6 min-h-screen py-12">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
