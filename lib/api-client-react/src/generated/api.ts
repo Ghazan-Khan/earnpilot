@@ -5,18 +5,26 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  ErrorResponse,
+  GenerateIncomePlanBody,
+  HealthStatus,
+  IncomePlan,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -99,3 +107,90 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Analyzes user income situation and returns a bold income upgrade plan
+ * @summary Generate AI income upgrade plan
+ */
+export const getGenerateIncomePlanUrl = () => {
+  return `/api/income/generate`;
+};
+
+export const generateIncomePlan = async (
+  generateIncomePlanBody: GenerateIncomePlanBody,
+  options?: RequestInit,
+): Promise<IncomePlan> => {
+  return customFetch<IncomePlan>(getGenerateIncomePlanUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateIncomePlanBody),
+  });
+};
+
+export const getGenerateIncomePlanMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateIncomePlan>>,
+    TError,
+    { data: BodyType<GenerateIncomePlanBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateIncomePlan>>,
+  TError,
+  { data: BodyType<GenerateIncomePlanBody> },
+  TContext
+> => {
+  const mutationKey = ["generateIncomePlan"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateIncomePlan>>,
+    { data: BodyType<GenerateIncomePlanBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateIncomePlan(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateIncomePlanMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateIncomePlan>>
+>;
+export type GenerateIncomePlanMutationBody = BodyType<GenerateIncomePlanBody>;
+export type GenerateIncomePlanMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate AI income upgrade plan
+ */
+export const useGenerateIncomePlan = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateIncomePlan>>,
+    TError,
+    { data: BodyType<GenerateIncomePlanBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateIncomePlan>>,
+  TError,
+  { data: BodyType<GenerateIncomePlanBody> },
+  TContext
+> => {
+  return useMutation(getGenerateIncomePlanMutationOptions(options));
+};

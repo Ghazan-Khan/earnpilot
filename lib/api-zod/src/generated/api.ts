@@ -14,3 +14,35 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Analyzes user income situation and returns a bold income upgrade plan
+ * @summary Generate AI income upgrade plan
+ */
+export const GenerateIncomePlanBody = zod.object({
+  income: zod.number().describe("Monthly income in USD"),
+  skill: zod.string().describe("User's main skill"),
+  time: zod.enum(["1h", "2h", "3h+"]).describe("Time available per day"),
+});
+
+export const GenerateIncomePlanResponse = zod.object({
+  under_earning_amount: zod.string().describe("Monthly under-earning amount"),
+  income_gap_score: zod
+    .string()
+    .describe("Score 0-100 representing income optimization level"),
+  biggest_mistake: zod.string().describe("The user's biggest income mistake"),
+  opportunities: zod.array(
+    zod.object({
+      title: zod.string(),
+      action: zod.string(),
+      potential: zod.string(),
+    }),
+  ),
+  seven_day_plan: zod
+    .array(zod.string())
+    .describe("Day-by-day action plan for 7 days"),
+  potential_increase: zod
+    .string()
+    .describe("Potential monthly income increase"),
+  yearly_loss: zod.string().describe("Yearly income being lost"),
+});

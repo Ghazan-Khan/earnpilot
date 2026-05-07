@@ -8,3 +8,51 @@
 export interface HealthStatus {
   status: string;
 }
+
+/**
+ * Time available per day
+ */
+export type GenerateIncomePlanBodyTime =
+  (typeof GenerateIncomePlanBodyTime)[keyof typeof GenerateIncomePlanBodyTime];
+
+export const GenerateIncomePlanBodyTime = {
+  "1h": "1h",
+  "2h": "2h",
+  "3h+": "3h+",
+} as const;
+
+export interface GenerateIncomePlanBody {
+  /** Monthly income in USD */
+  income: number;
+  /** User's main skill */
+  skill: string;
+  /** Time available per day */
+  time: GenerateIncomePlanBodyTime;
+}
+
+export interface Opportunity {
+  title: string;
+  action: string;
+  potential: string;
+}
+
+export interface IncomePlan {
+  /** Monthly under-earning amount */
+  under_earning_amount: string;
+  /** Score 0-100 representing income optimization level */
+  income_gap_score: string;
+  /** The user's biggest income mistake */
+  biggest_mistake: string;
+  opportunities: Opportunity[];
+  /** Day-by-day action plan for 7 days */
+  seven_day_plan: string[];
+  /** Potential monthly income increase */
+  potential_increase: string;
+  /** Yearly income being lost */
+  yearly_loss: string;
+}
+
+export interface ErrorResponse {
+  error: string;
+  message: string;
+}

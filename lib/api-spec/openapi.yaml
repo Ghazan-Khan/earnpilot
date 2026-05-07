@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: income
+    description: Income analysis operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /income/generate:
+    post:
+      operationId: generateIncomePlan
+      tags: [income]
+      summary: Generate AI income upgrade plan
+      description: Analyzes user income situation and returns a bold income upgrade plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateIncomePlanBody"
+      responses:
+        "200":
+          description: Income plan generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncomePlan"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +66,78 @@ components:
           type: string
       required:
         - status
-
+    GenerateIncomePlanBody:
+      type: object
+      properties:
+        income:
+          type: number
+          description: Monthly income in USD
+        skill:
+          type: string
+          description: User's main skill
+        time:
+          type: string
+          enum: ["1h", "2h", "3h+"]
+          description: Time available per day
+      required:
+        - income
+        - skill
+        - time
+    Opportunity:
+      type: object
+      properties:
+        title:
+          type: string
+        action:
+          type: string
+        potential:
+          type: string
+      required:
+        - title
+        - action
+        - potential
+    IncomePlan:
+      type: object
+      properties:
+        under_earning_amount:
+          type: string
+          description: Monthly under-earning amount
+        income_gap_score:
+          type: string
+          description: Score 0-100 representing income optimization level
+        biggest_mistake:
+          type: string
+          description: The user's biggest income mistake
+        opportunities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Opportunity"
+        seven_day_plan:
+          type: array
+          items:
+            type: string
+          description: Day-by-day action plan for 7 days
+        potential_increase:
+          type: string
+          description: Potential monthly income increase
+        yearly_loss:
+          type: string
+          description: Yearly income being lost
+      required:
+        - under_earning_amount
+        - income_gap_score
+        - biggest_mistake
+        - opportunities
+        - seven_day_plan
+        - potential_increase
+        - yearly_loss
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message

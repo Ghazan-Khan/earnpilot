@@ -6,4 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./errorResponse";
+export * from "./generateIncomePlanBody";
+export * from "./generateIncomePlanBodyTime";
 export * from "./healthStatus";
+export * from "./incomePlan";
+export * from "./opportunity";
