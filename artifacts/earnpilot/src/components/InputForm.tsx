@@ -32,7 +32,7 @@ export default function InputForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      income: undefined,
+      income: "" as unknown as number,
       skill: "",
       time: "2h",
     },
