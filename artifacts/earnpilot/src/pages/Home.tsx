@@ -5,14 +5,19 @@ import HowItWorks from "@/components/HowItWorks";
 import InputForm from "@/components/InputForm";
 import Loader from "@/components/Loader";
 import ResultCard from "@/components/ResultCard";
-import { type IncomePlan } from "@workspace/api-client-react/src/generated/api.schemas";
+import { useGenerateIncomePlan } from "@workspace/api-client-react";
+import { type IncomePlan, type GenerateIncomePlanBody } from "@workspace/api-client-react/src/generated/api.schemas";
 
 export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<IncomePlan | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
+
+  // Mutation lives HERE so it is never unmounted while the loader is shown
+  const mutation = useGenerateIncomePlan();
 
   useEffect(() => {
     const saved = localStorage.getItem("earnpilot_result");
@@ -25,17 +30,35 @@ export default function Home() {
     }
   }, []);
 
-  const handleGenerate = (plan: IncomePlan) => {
-    setResult(plan);
-    setIsGenerating(false);
-    localStorage.setItem("earnpilot_result", JSON.stringify(plan));
-    setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+  const handleFormSubmit = (values: GenerateIncomePlanBody) => {
+    setIsGenerating(true);
+    setApiError(null);
+
+    mutation.mutate(
+      { data: values },
+      {
+        onSuccess: (plan) => {
+          setResult(plan);
+          setIsGenerating(false);
+          localStorage.setItem("earnpilot_result", JSON.stringify(plan));
+          setTimeout(() => {
+            resultsRef.current?.scrollIntoView({ behavior: "smooth" });
+          }, 100);
+        },
+        onError: (err) => {
+          setIsGenerating(false);
+          const message =
+            err instanceof Error ? err.message : "Something went wrong. Please try again.";
+          setApiError(message);
+          formRef.current?.scrollIntoView({ behavior: "smooth" });
+        },
+      }
+    );
   };
 
   const handleReset = () => {
     setResult(null);
+    setApiError(null);
     localStorage.removeItem("earnpilot_result");
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -48,10 +71,10 @@ export default function Home() {
         {/* Hero — full viewport */}
         <Hero onStart={() => formRef.current?.scrollIntoView({ behavior: "smooth" })} />
 
-        {/* How It Works — visible after scrolling past hero */}
+        {/* How It Works — visible before result */}
         {!result && !isGenerating && <HowItWorks />}
 
-        {/* Form section */}
+        {/* Form section — always mounted so scroll ref is always valid */}
         <div ref={formRef} className="pb-8">
           {!result && !isGenerating && (
             <motion.div
@@ -66,13 +89,11 @@ export default function Home() {
                 <h2 className="mt-3 text-2xl md:text-3xl font-bold text-white">
                   Enter your current situation
                 </h2>
-                <p className="mt-2 text-muted-foreground">No account needed. Results in under 60 seconds.</p>
+                <p className="mt-2 text-muted-foreground">
+                  No account needed. Results in under 60 seconds.
+                </p>
               </div>
-              <InputForm
-                onSubmit={() => setIsGenerating(true)}
-                onSuccess={handleGenerate}
-                onError={() => setIsGenerating(false)}
-              />
+              <InputForm onSubmit={handleFormSubmit} apiError={apiError} />
             </motion.div>
           )}
         </div>
