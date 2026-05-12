@@ -73,7 +73,7 @@ You MUST respond with ONLY valid JSON in this exact format:
       if (!jsonMatch) throw new Error("No JSON found");
       parsed = JSON.parse(jsonMatch[0]);
     } catch {
-      req.log.error({ rawContent }, "Failed to parse AI JSON response");
+      (req as any).log.error({ rawContent }, "Failed to parse AI JSON response");
       res.status(500).json({
         error: "parse_error",
         message: "Failed to parse AI response",
@@ -102,7 +102,7 @@ You MUST respond with ONLY valid JSON in this exact format:
 
     res.json(plan);
   } catch (err) {
-    req.log.error({ err }, "Income plan generation failed");
+    (req as any).log.error({ err }, "Income plan generation failed");
     res.status(500).json({
       error: "server_error",
       message: "Failed to generate income plan. Please try again.",
